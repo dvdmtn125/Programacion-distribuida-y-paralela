@@ -1,0 +1,129 @@
+﻿* { 
+    box-sizing: border-box;
+    font-family: "Segoe UI",
+    sans-serif; 
+}
+
+body { 
+    margin: 0; 
+    background: #f4f7fb; 
+    color: #1a1a1a; 
+}
+
+.container { 
+    max-width: 1100px; 
+    margin: 0 auto; 
+    padding: 24px; 
+}
+
+h1 { 
+    margin-top: 0; 
+}
+
+.tabs { 
+    display: flex; 
+    gap: 8px; 
+    margin-bottom: 16px; 
+    flex-wrap: wrap; 
+}
+
+.tabs button { 
+    border: 1px solid #2f5ea7; 
+    background: #fff; 
+    color: #2f5ea7; 
+    padding: 8px 12px; 
+    cursor: pointer; 
+    border-radius: 8px; 
+}
+
+.tabs .active { 
+    background: #2f5ea7; 
+    color: #fff; 
+}
+
+.form-grid { 
+    display: grid; 
+    grid-template-columns: 
+    repeat(auto-fit, minmax(180px, 1fr)); 
+    gap: 8px; 
+    margin-bottom: 18px; 
+}
+
+input, select, button { 
+    padding: 10px; 
+    border-radius: 8px; 
+    border: 1px solid #c8d2e2; 
+}
+
+button { 
+    cursor: pointer; 
+}
+
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    background: #fff; 
+    border-radius: 8px; 
+    overflow: hidden; 
+}
+
+th, td { 
+    border: 1px solid #e1e7f0; 
+    padding: 8px; 
+    text-align: left; 
+}
+
+th { 
+    background: #eaf0fb;
+}
+
+.error { 
+    color: #b3261e; 
+    font-weight: 600; 
+}
+
+.report-grid { 
+    display: grid; 
+    grid-template-columns: 1fr; gap: 16px; 
+}
+
+.alerts { 
+    display: grid; 
+    gap: 8px; 
+    margin-bottom: 12px; 
+}
+
+.alert { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 10px 12px; 
+    border-radius: 8px; 
+    border: 1px solid #c8d2e2; 
+    background: #fff; 
+}
+
+.alert.success { 
+    border-color: #2e7d32; 
+    color: #1b5e20; 
+    background: #e8f5e9; 
+}
+
+.alert.error { 
+    border-color: #b3261e; 
+    color: #7a1b14; 
+    background: #ffebee; 
+}
+
+.alert button { 
+    border: none; 
+    background: transparent; 
+    font-weight: 700; 
+    cursor: pointer; 
+}
+
+@media (max-width: 768px) { 
+    .container { 
+        padding: 14px; 
+    } 
+}
