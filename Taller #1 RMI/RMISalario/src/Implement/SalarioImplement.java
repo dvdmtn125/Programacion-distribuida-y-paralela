@@ -53,7 +53,7 @@ public class SalarioImplement extends UnicastRemoteObject implements SalarioInte
         //Llenar la matriz con numeros aleatorios entre 1000 y 10000
         for (int i = 0; i < a; i++) {
             for (int j = 0; j < b; j++) {
-                // Salario aleatorio entre 1000 y 10000
+                // Salario aleatorio entre 1000 y 10000.
                 this.matriz[i][j] = (int)(Math.random() * 9000 + 1000);
             }
         }
