@@ -1,0 +1,150 @@
+/* Reset basico y tipografia general */
+* { 
+    box-sizing: border-box;
+    font-family: "Segoe UI",
+    sans-serif; 
+}
+
+/* Fondo y color base */
+body { 
+    margin: 0; 
+    background: #f4f7fb; 
+    color: #1a1a1a; 
+}
+
+/* Contenedor principal */
+.container { 
+    max-width: 1100px; 
+    margin: 0 auto; 
+    padding: 24px; 
+}
+
+/* Titulo principal */
+h1 { 
+    margin-top: 0; 
+}
+
+/* Navegacion por pesta�as */
+.tabs { 
+    display: flex; 
+    gap: 8px; 
+    margin-bottom: 16px; 
+    flex-wrap: wrap; 
+}
+
+/* Botones de pestañas */
+.tabs button { 
+    border: 1px solid #2f5ea7; 
+    background: #fff; 
+    color: #2f5ea7; 
+    padding: 8px 12px; 
+    cursor: pointer; 
+    border-radius: 8px; 
+}
+
+/* Pestaña activa */
+.tabs .active { 
+    background: #2f5ea7; 
+    color: #fff; 
+}
+
+/* Layout de formularios en grilla */
+.form-grid { 
+    display: grid; 
+    grid-template-columns: 
+    repeat(auto-fit, minmax(180px, 1fr)); 
+    gap: 8px; 
+    margin-bottom: 18px; 
+}
+
+/* Controles de formulario */
+input, select, button { 
+    padding: 10px; 
+    border-radius: 8px; 
+    border: 1px solid #c8d2e2; 
+}
+
+/* Estilo base para botones */
+button { 
+    cursor: pointer; 
+}
+
+/* Tablas de datos */
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    background: #fff; 
+    border-radius: 8px; 
+    overflow: hidden; 
+}
+
+/* Celdas de tabla */
+th, td { 
+    border: 1px solid #e1e7f0; 
+    padding: 8px; 
+    text-align: left; 
+}
+
+/* Encabezados de tabla */
+th { 
+    background: #eaf0fb;
+}
+
+/* Mensajes de error */
+.error { 
+    color: #b3261e; 
+    font-weight: 600; 
+}
+
+/* Layout para reportes */
+.report-grid { 
+    display: grid; 
+    grid-template-columns: 1fr; gap: 16px; 
+}
+
+/* Contenedor de alertas */
+.alerts { 
+    display: grid; 
+    gap: 8px; 
+    margin-bottom: 12px; 
+}
+
+/* Alerta base */
+.alert { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 10px 12px; 
+    border-radius: 8px; 
+    border: 1px solid #c8d2e2; 
+    background: #fff; 
+}
+
+/* Alerta de exito */
+.alert.success { 
+    border-color: #2e7d32; 
+    color: #1b5e20; 
+    background: #e8f5e9; 
+}
+
+/* Alerta de error */
+.alert.error { 
+    border-color: #b3261e; 
+    color: #7a1b14; 
+    background: #ffebee; 
+}
+
+/* Boton de cerrar alerta */
+.alert button { 
+    border: none; 
+    background: transparent; 
+    font-weight: 700; 
+    cursor: pointer; 
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) { 
+    .container { 
+        padding: 14px; 
+    } 
+}

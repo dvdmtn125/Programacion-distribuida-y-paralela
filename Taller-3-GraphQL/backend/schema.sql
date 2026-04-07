@@ -1,0 +1,25 @@
+﻿CREATE TABLE IF NOT EXISTS clientes (
+  cedula VARCHAR(20) PRIMARY KEY,
+  nombres VARCHAR(100) NOT NULL,
+  apellidos VARCHAR(100) NOT NULL,
+  direccion VARCHAR(150) NOT NULL,
+  telefono VARCHAR(30) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS medicamentos (
+  id SERIAL PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL,
+  descripcion TEXT NOT NULL,
+  dosis VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS mascotas (
+  id SERIAL PRIMARY KEY,
+  identificacion VARCHAR(30) UNIQUE NOT NULL,
+  nombre VARCHAR(100) NOT NULL,
+  raza VARCHAR(100) NOT NULL,
+  edad INTEGER NOT NULL,
+  peso NUMERIC(10,2) NOT NULL,
+  cliente_cedula VARCHAR(20) REFERENCES clientes(cedula) ON DELETE RESTRICT,
+  medicamento_id INTEGER REFERENCES medicamentos(id) ON DELETE SET NULL
+);
