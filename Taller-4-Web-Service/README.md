@@ -40,6 +40,22 @@ Desde la raiz del proyecto:
 docker compose up --build
 ```
 
+### Como se conectan los contenedores
+
+- `postgres` levanta la base de datos PostgreSQL.
+- `backend` se conecta a PostgreSQL usando el nombre del servicio `postgres`.
+- `frontend` corre en Vite y desde el navegador consume la API en `http://localhost:8000`.
+- Docker publica los puertos para que puedas abrir el sistema desde Windows sin entrar al contenedor.
+
+### Variables usadas con Docker
+
+- `DATABASE_URL=postgresql+psycopg://postgres:postgres@postgres:5432/edtech_db`
+  Esta URL la usa el backend dentro de Docker. El host es `postgres` porque asi se llama el servicio de la base de datos en `docker-compose.yml`.
+- `ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173`
+  Permite que el frontend pueda hacer peticiones al backend sin errores de CORS.
+- `VITE_API_URL=http://localhost:8000`
+  Indica al frontend la direccion publica del backend vista desde tu navegador.
+
 Para detenerlo:
 
 ```bash
@@ -77,6 +93,8 @@ npm run dev
   - `ALLOWED_ORIGINS`
 - Frontend:
   - `VITE_API_URL`
+
+Ejemplo base en [`.env.example`](D:/Documentos/Universidad/Programacion-paralela-y-distribuida/Practica/Taller-4-Web-Service/.env.example).
 
 ## Idea del proyecto
 

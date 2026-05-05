@@ -5,7 +5,7 @@ from app.database import Base
 
 
 class Curso(Base):
-    # Stores the courses available on the platform.
+    # Guarda los cursos disponibles dentro de la plataforma.
     __tablename__ = "cursos"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -14,12 +14,12 @@ class Curso(Base):
     cupo = Column(Integer, nullable=False, default=30)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    # A course can have many enrollments.
+    # Un curso puede tener muchas inscripciones asociadas.
     inscripciones = relationship("Inscripcion", back_populates="curso", cascade="all, delete")
 
 
 class Usuario(Base):
-    # Stores the students registered in the system.
+    # Guarda los estudiantes o usuarios registrados en el sistema.
     __tablename__ = "usuarios"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -28,12 +28,12 @@ class Usuario(Base):
     carrera = Column(String(120), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    # A student can appear in many enrollments.
+    # Un estudiante puede aparecer en muchas inscripciones.
     inscripciones = relationship("Inscripcion", back_populates="usuario", cascade="all, delete")
 
 
 class Inscripcion(Base):
-    # Join table that links students with courses.
+    # Tabla intermedia que relaciona estudiantes con cursos.
     __tablename__ = "inscripciones"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -41,6 +41,6 @@ class Inscripcion(Base):
     curso_id = Column(Integer, ForeignKey("cursos.id", ondelete="CASCADE"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    # These relationships allow nested responses in the API.
+    # Estas relaciones permiten devolver datos anidados en la API.
     usuario = relationship("Usuario", back_populates="inscripciones")
     curso = relationship("Curso", back_populates="inscripciones")

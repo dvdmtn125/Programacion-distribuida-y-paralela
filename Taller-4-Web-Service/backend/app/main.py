@@ -10,10 +10,10 @@ from app.database import Base, engine, get_db
 from app.reporting import build_enrollment_report_xml
 
 
-# Creates the tables when the API starts if they do not exist yet.
+# Crea las tablas al iniciar la API si todavia no existen.
 Base.metadata.create_all(bind=engine)
 
-# Local and Docker frontend origins allowed to call the API.
+# Origenes permitidos para que el frontend local o en Docker consuma la API.
 ALLOWED_ORIGINS = os.getenv(
     "ALLOWED_ORIGINS",
     "http://localhost:5173,http://127.0.0.1:5173",
@@ -25,7 +25,7 @@ app = FastAPI(
     description="CRUD de cursos, usuarios e inscripciones con reporte XML.",
 )
 
-# Enables communication between React and FastAPI in the browser.
+# Habilita la comunicacion entre React y FastAPI desde el navegador.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[origin.strip() for origin in ALLOWED_ORIGINS if origin.strip()],
@@ -37,7 +37,7 @@ app.add_middleware(
 
 @app.get("/")
 def read_root() -> dict[str, str]:
-    # Simple message to verify that the API is running.
+    # Mensaje simple para verificar que la API esta funcionando.
     return {"message": "API de plataforma edtech en funcionamiento"}
 
 
@@ -129,19 +129,19 @@ def create_inscripcion(
     payload: schemas.InscripcionCreate,
     db: Session = Depends(get_db),
 ) -> models.Inscripcion:
-    # First we validate that the student and course exist.
+    # Primero se valida que el estudiante y el curso existan.
     if not crud.get_usuario(db, payload.usuario_id):
         raise HTTPException(status_code=404, detail="Usuario no encontrado.")
     curso = crud.get_curso(db, payload.curso_id)
     if not curso:
         raise HTTPException(status_code=404, detail="Curso no encontrado.")
 
-    # Available seats depend on the number of current enrollments.
+    # Los cupos disponibles dependen del numero de inscripciones actuales.
     inscritos = crud.count_inscripciones_by_curso(db, payload.curso_id)
     if inscritos >= curso.cupo:
         raise HTTPException(status_code=400, detail="No hay cupos disponibles para este curso.")
 
-    # The same student cannot enroll twice in the same course.
+    # El mismo estudiante no puede inscribirse dos veces en el mismo curso.
     if crud.enrollment_exists(db, payload.usuario_id, payload.curso_id):
         raise HTTPException(status_code=400, detail="El estudiante ya esta inscrito en este curso.")
     return crud.create_inscripcion(db, payload)
@@ -158,7 +158,7 @@ def delete_inscripcion(inscripcion_id: int, db: Session = Depends(get_db)) -> Re
 
 @app.get("/reportes/inscripciones.xml")
 def enrollment_report(db: Session = Depends(get_db)) -> Response:
-    # Returns the XML summary required by the project.
+    # Devuelve el resumen XML solicitado por el proyecto.
     total = crud.count_inscripciones(db)
     distribution = crud.course_distribution(db)
     xml = build_enrollment_report_xml(total, distribution)

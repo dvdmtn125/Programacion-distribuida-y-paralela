@@ -4,7 +4,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class CursoBase(BaseModel):
-    # Shared validation used when creating or updating a course.
+    # Validaciones compartidas para crear o actualizar un curso.
     nombre: str = Field(min_length=3, max_length=120)
     descripcion: str = Field(min_length=5, max_length=255)
     cupo: int = Field(gt=0, le=500)
@@ -19,7 +19,7 @@ class CursoUpdate(CursoBase):
 
 
 class Curso(CursoBase):
-    # API response for a course.
+    # Respuesta que devuelve la API para un curso.
     id: int
     created_at: datetime
 
@@ -27,7 +27,7 @@ class Curso(CursoBase):
 
 
 class UsuarioBase(BaseModel):
-    # Shared validation used when creating or updating a user.
+    # Validaciones compartidas para crear o actualizar un usuario.
     nombre: str = Field(min_length=3, max_length=120)
     correo: EmailStr
     carrera: str = Field(min_length=3, max_length=120)
@@ -42,7 +42,7 @@ class UsuarioUpdate(UsuarioBase):
 
 
 class Usuario(UsuarioBase):
-    # API response for a user.
+    # Respuesta que devuelve la API para un usuario.
     id: int
     created_at: datetime
 
@@ -50,7 +50,7 @@ class Usuario(UsuarioBase):
 
 
 class InscripcionBase(BaseModel):
-    # An enrollment only needs the linked user and course ids.
+    # Una inscripcion solo necesita los ids del usuario y del curso.
     usuario_id: int
     curso_id: int
 
@@ -60,7 +60,7 @@ class InscripcionCreate(InscripcionBase):
 
 
 class Inscripcion(InscripcionBase):
-    # API response for an enrollment with nested data.
+    # Respuesta que devuelve la API para una inscripcion con datos anidados.
     id: int
     created_at: datetime
     usuario: Usuario

@@ -5,22 +5,22 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 
-# Connection string used by SQLAlchemy to connect to PostgreSQL.
+# Cadena de conexion que usa SQLAlchemy para conectarse a PostgreSQL.
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "postgresql+psycopg://postgres:postgres@localhost:5432/edtech_db",
 )
 
-# The engine manages database connections for the whole app.
+# El motor administra las conexiones a la base de datos de toda la aplicacion.
 engine = create_engine(DATABASE_URL, future=True)
-# SessionLocal creates one session per incoming request.
+# SessionLocal crea una sesion independiente por cada peticion.
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, future=True)
-# Base is the parent class for all ORM models.
+# Base es la clase padre de todos los modelos ORM.
 Base = declarative_base()
 
 
 def get_db() -> Generator:
-    # FastAPI injects this session into the endpoints that need the database.
+    # FastAPI inyecta esta sesion en los endpoints que necesitan base de datos.
     db = SessionLocal()
     try:
         yield db

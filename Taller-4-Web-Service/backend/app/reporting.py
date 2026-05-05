@@ -2,7 +2,7 @@ from xml.etree.ElementTree import Element, SubElement, tostring
 
 
 def build_enrollment_report_xml(total: int, distribution: list[dict[str, float | int | str]]) -> str:
-    # Generates the XML report requested in the assignment.
+    # Genera el reporte XML solicitado en el enunciado del proyecto.
     root = Element("reporte_inscripciones")
 
     total_node = SubElement(root, "total_estudiantes_inscritos")
