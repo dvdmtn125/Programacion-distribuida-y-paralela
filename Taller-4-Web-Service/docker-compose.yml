@@ -26,7 +26,7 @@ services:
     container_name: edtech-backend
     environment:
       # Dentro de Docker, el backend se conecta a PostgreSQL usando el nombre del servicio "postgres".
-      DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/edtech_db
+      DATABASE_URL: postgresql+psycopg://neondb_owner:npg_k3osPCvZcMz5@ep-square-credit-aqcyo0wx.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require
       # Permite que el frontend abierto en el navegador consuma la API.
       ALLOWED_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
     ports:

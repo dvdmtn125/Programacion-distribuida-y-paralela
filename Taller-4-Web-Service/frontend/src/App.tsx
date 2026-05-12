@@ -444,7 +444,12 @@ export default function App() {
               <p className="eyebrow">Reporte XML</p>
               <h2>Indicadores de inscripcion</h2>
             </div>
-            <button onClick={() => void loadData()}>Actualizar reporte</button>
+            <div className="report-actions">
+              <button onClick={() => window.open(api.getReporteXmlUrl(), "_blank", "noopener,noreferrer")}>
+                XML
+              </button>
+              <button onClick={() => void loadData()}>Actualizar reporte</button>
+            </div>
           </div>
           <pre>{xmlReport || "El reporte aparecera aqui cuando el backend este disponible."}</pre>
         </article>

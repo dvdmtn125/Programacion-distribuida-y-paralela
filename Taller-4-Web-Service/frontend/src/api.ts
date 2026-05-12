@@ -23,11 +23,35 @@ export type Inscripcion = {
   curso: Curso;
 };
 
-// The frontend reads the backend URL from Vite env vars or falls back to localhost.
+type ApiValidationError = {
+  detail?: Array<{
+    loc?: Array<string | number>;
+    msg?: string;
+  }> | string;
+};
+
+// El frontend lee la URL del backend desde las variables de entorno de Vite.
 const API_URL = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000";
 
+function formatApiError(data: ApiValidationError) {
+  if (Array.isArray(data.detail)) {
+    return data.detail
+      .map((item) => {
+        const field = item.loc?.slice(1).join(".") ?? "campo";
+        return `${field}: ${item.msg ?? "valor invalido"}`;
+      })
+      .join(" | ");
+  }
+
+  if (typeof data.detail === "string") {
+    return data.detail;
+  }
+
+  return "Error inesperado";
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  // Shared helper for the HTTP requests made by the React app.
+  // Helper compartido para las peticiones HTTP del frontend.
   const response = await fetch(`${API_URL}${path}`, {
     headers: {
       "Content-Type": "application/json"
@@ -37,7 +61,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
   if (!response.ok) {
     const data = await response.json().catch(() => ({ detail: "Error inesperado" }));
-    throw new Error(data.detail ?? "Error inesperado");
+    throw new Error(formatApiError(data));
   }
 
   if (response.status === 204) {
@@ -47,7 +71,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-// Centralized API methods keep the UI code shorter and easier to maintain.
+// Metodos centralizados para mantener la UI mas simple.
 export const api = {
   listCursos: () => request<Curso[]>("/cursos"),
   createCurso: (payload: Omit<Curso, "id" | "created_at">) =>
@@ -68,5 +92,6 @@ export const api = {
       throw new Error("No fue posible cargar el reporte XML");
     }
     return response.text();
-  }
+  },
+  getReporteXmlUrl: () => `${API_URL}/reportes/inscripciones.xml`
 };

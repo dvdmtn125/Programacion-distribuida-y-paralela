@@ -154,6 +154,12 @@ button:disabled {
   margin-bottom: 1rem;
 }
 
+.report-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
 .stack-form {
   display: grid;
   gap: 0.8rem;
@@ -237,5 +243,14 @@ tbody tr:hover {
   .tabs-bar {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .report-actions {
+    width: 100%;
   }
 }
