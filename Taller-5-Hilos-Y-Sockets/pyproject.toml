@@ -1,0 +1,11 @@
+[project]
+name = "taller-5-hilos-y-sockets"
+version = "0.1.0"
+description = "Sopa de letras con arquitectura clean, hilos, sockets y GUI en Python"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+taller-sopa = "word_search.bootstrap:main"
+taller-servidor = "word_search.server_launcher:main"

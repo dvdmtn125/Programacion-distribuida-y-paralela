@@ -1,0 +1,191 @@
+{
+  "name": "Words Validation for Word Search",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "words-validator",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Receive Language",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body ?? $json;\nconst rawLanguage = String(body.language ?? 'es').trim().toLowerCase();\nconst language = ['es', 'en'].includes(rawLanguage) ? rawLanguage : 'es';\nreturn [{\n  json: {\n    language,\n    count: 10,\n    minLength: 4,\n    maxLength: 12\n  }\n}];"
+      },
+      "id": "2",
+      "name": "Normalize Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://random-words-api.kushcreates.com/api?language={{$json.language}}",
+        "options": {}
+      },
+      "id": "3",
+      "name": "Fetch Random Words",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $('Normalize Input').first().json;\nconst language = config.language;\nconst count = config.count;\nconst minLength = config.minLength;\nconst maxLength = config.maxLength;\n\nconst normalizeWord = (word) => String(word)\n  .normalize('NFD')\n  .replace(/[\\u0300-\\u036f]/g, '')\n  .replace(/[^A-Za-z]/g, '')\n  .toUpperCase();\n\nconst shuffle = (array) => {\n  const copy = [...array];\n  for (let index = copy.length - 1; index > 0; index -= 1) {\n    const randomIndex = Math.floor(Math.random() * (index + 1));\n    [copy[index], copy[randomIndex]] = [copy[randomIndex], copy[index]];\n  }\n  return copy;\n};\n\nconst payload = items.map(item => item.json);\nconst seen = new Set();\nconst allCandidates = [];\n\nfor (const item of payload) {\n  const rawWord = String(item.word ?? '').trim();\n  if (!rawWord) continue;\n  const cleaned = normalizeWord(rawWord);\n  if (!cleaned) continue;\n  if (cleaned.length < minLength || cleaned.length > maxLength) continue;\n  if (seen.has(cleaned)) continue;\n  seen.add(cleaned);\n  allCandidates.push(cleaned);\n}\n\nif (allCandidates.length < count) {\n  throw new Error(`Solo se obtuvieron ${allCandidates.length} candidatas despues del filtrado.`);\n}\n\nconst candidates = shuffle(allCandidates).slice(0, Math.min(25, allCandidates.length));\n\nreturn [{\n  json: {\n    language,\n    count,\n    candidates\n  }\n}];"
+      },
+      "id": "4",
+      "name": "Filter Candidates",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        940,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-goog-api-key",
+              "value": "AIzaSyBVSwSzyaom9uM60oimJOsuigERrmy-L-0"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"Valida esta lista de palabras para una sopa de letras. Reglas: 1) idioma: {{$json.language === 'es' ? 'español' : 'inglés'}}, 2) devuelve exactamente 10 palabras, 3) solo letras, 4) sin numeros ni simbolos, 5) evita palabras ofensivas, extremadamente raras o poco claras, 6) responde solo JSON con este formato exacto: {\\\"words\\\":[\\\"PALABRA1\\\",\\\"PALABRA2\\\"]}. Lista candidata: {{$json.candidates.join(', ')}}\"\n        }\n      ]\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "5",
+      "name": "Validate With Gemini",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const fallback = $('Filter Candidates').first().json;\nconst candidates = fallback.candidates;\nconst language = fallback.language;\nconst count = fallback.count;\n\nconst normalizeWord = (word) => String(word)\n  .normalize('NFD')\n  .replace(/[\\u0300-\\u036f]/g, '')\n  .replace(/[^A-Za-z]/g, '')\n  .toUpperCase();\n\nlet text = '';\ntry {\n  text = $json.candidates?.[0]?.content?.parts?.[0]?.text ?? '';\n} catch (error) {\n  text = '';\n}\n\nlet parsedWords = [];\ntry {\n  const cleanedText = text.trim().replace(/^```json\\s*/i, '').replace(/^```/i, '').replace(/```$/i, '').trim();\n  const parsed = JSON.parse(cleanedText);\n  if (Array.isArray(parsed.words)) {\n    parsedWords = parsed.words;\n  }\n} catch (error) {\n  parsedWords = [];\n}\n\nconst finalWords = [];\nconst seen = new Set();\nfor (const word of parsedWords) {\n  const cleaned = normalizeWord(word);\n  if (!cleaned) continue;\n  if (seen.has(cleaned)) continue;\n  seen.add(cleaned);\n  finalWords.push(cleaned);\n  if (finalWords.length >= count) break;\n}\n\nif (finalWords.length < count) {\n  for (const word of candidates) {\n    const cleaned = normalizeWord(word);\n    if (!cleaned) continue;\n    if (seen.has(cleaned)) continue;\n    seen.add(cleaned);\n    finalWords.push(cleaned);\n    if (finalWords.length >= count) break;\n  }\n}\n\nif (finalWords.length < count) {\n  throw new Error(`No fue posible completar ${count} palabras validas.`);\n}\n\nreturn [{\n  json: {\n    language,\n    words: finalWords.slice(0, count)\n  }\n}];"
+      },
+      "id": "6",
+      "name": "Build Final Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{$json}}",
+        "options": {}
+      },
+      "id": "7",
+      "name": "Return Words",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1700,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Receive Language": {
+      "main": [
+        [
+          {
+            "node": "Normalize Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Input": {
+      "main": [
+        [
+          {
+            "node": "Fetch Random Words",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Random Words": {
+      "main": [
+        [
+          {
+            "node": "Filter Candidates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Candidates": {
+      "main": [
+        [
+          {
+            "node": "Validate With Gemini",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate With Gemini": {
+      "main": [
+        [
+          {
+            "node": "Build Final Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Final Response": {
+      "main": [
+        [
+          {
+            "node": "Return Words",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "1"
+}
