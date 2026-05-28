@@ -5,7 +5,7 @@ Proyecto de sopa de letras en Python con arquitectura limpia, sockets TCP, hilos
 ## Caracteristicas
 
 - Usa `uv` para ejecutar y administrar el proyecto.
-- Puede consultar un workflow de `n8n` para obtener y validar palabras.
+- Puede consultar un workflow de `n8n` para obtener y validar palabras con Gemini.
 - Mantiene fallback a la API `https://random-words-api.kushcreates.com/api`.
 - Genera 10 palabras por partida en ingles (`en`) o espanol (`es`).
 - Inicia un servidor TCP local y una interfaz cliente que se comunica por sockets.
@@ -22,36 +22,60 @@ word_search/
 `-- presentation/
 ```
 
-## Ejecucion con uv
+## Configuracion local
 
-```bash
-uv run python main.py
+El archivo `.env` guarda valores locales y no se sube a GitHub gracias a `.gitignore`.
+Debes poner tu nueva API key de Gemini en:
+
+```text
+.env
 ```
+
+Ejemplo:
+
+```env
+N8N_WORDS_WEBHOOK_URL=http://localhost:5678/webhook/words-validator
+N8N_TIMEOUT_SECONDS=60
+GEMINI_API_KEY=tu_api_key_nueva_de_gemini
+```
+
+La app Python usa `N8N_WORDS_WEBHOOK_URL` y `N8N_TIMEOUT_SECONDS`.
+`GEMINI_API_KEY` la usa `n8n`, no Python directamente.
 
 ## Integracion con n8n
 
-1. Importa el workflow [word_search_words_workflow.json](D:/Documentos/Universidad/Programacion-paralela-y-distribuida/Practica/Taller-5-Hilos-Y-Sockets/n8n/word_search_words_workflow.json) en `n8n`.
-2. Configura tu clave de Gemini en el nodo `Validate With Gemini`.
-3. Expone el webhook del workflow real, por ejemplo:
+1. Importa el workflow [Words Validation for Word Search.json](D:/Documentos/Universidad/Programacion-paralela-y-distribuida/Practica/Taller-5-Hilos-Y-Sockets/n8n/Words%20Validation%20for%20Word%20Search.json) en `n8n`.
+2. En el nodo `Validate With Gemini`, usa una credencial `Header Auth` con:
+
+```text
+Name: x-goog-api-key
+Value: tu_api_key_nueva_de_gemini
+```
+
+3. Publica el webhook:
 
 ```text
 http://localhost:5678/webhook/words-validator
 ```
 
-4. Antes de ejecutar la app, define:
+Si modificas el archivo del workflow en el proyecto, recuerda reimportarlo o actualizar el workflow publicado en `n8n`; de lo contrario, la app seguira usando la version anterior.
+
+## Ejecucion con uv
+
+En esta opcion no se agregan dependencias para cargar `.env` automaticamente. Define las variables de Python en PowerShell y luego ejecuta:
 
 ```powershell
 $env:N8N_WORDS_WEBHOOK_URL="http://localhost:5678/webhook/words-validator"
+$env:N8N_TIMEOUT_SECONDS="60"
+
+uv run python main.py
 ```
 
-Opcionalmente puedes ajustar el timeout:
+Si `n8n` responde correctamente, en consola veras:
 
-```powershell
-$env:N8N_TIMEOUT_SECONDS="15"
+```text
+[WORDS] Fuente utilizada: N8nWorkflowClient
 ```
-
-El JSON del repo ya esta saneado para que no guarde la clave de Gemini dentro del archivo; configúrala directamente en `n8n`.
-Si modificas el archivo del workflow en el proyecto, recuerda reimportarlo o actualizar el workflow publicado en `n8n`; de lo contrario, la app seguira usando la version anterior.
 
 Si `n8n` no responde, el servidor vuelve automaticamente a la API directa para no romper el juego.
 

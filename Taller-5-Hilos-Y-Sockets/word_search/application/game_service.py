@@ -42,6 +42,7 @@ class GameService:
         # Si falla o no existe, se mantiene la API directa como respaldo.
         sources: list[WordSource] = []
         if self._settings.n8n_words_webhook_url:
+            print(f"[WORDS] Webhook de n8n configurado: {self._settings.n8n_words_webhook_url}")
             sources.append(
                 N8nWorkflowClient(
                     webhook_url=self._settings.n8n_words_webhook_url,

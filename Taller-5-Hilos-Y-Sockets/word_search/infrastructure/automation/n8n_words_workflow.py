@@ -27,9 +27,34 @@ class N8nWorkflowClient:
 
         try:
             with urlopen(request, timeout=self._timeout_seconds) as response:
-                raw_payload = json.load(response)
-        except (HTTPError, URLError, TimeoutError, json.JSONDecodeError) as exc:
+                raw_body = response.read().decode("utf-8", errors="replace").strip()
+        except HTTPError as exc:
+            error_body = exc.read().decode("utf-8", errors="replace").strip()
+            if error_body:
+                raise RuntimeError(
+                    f"El workflow de n8n respondio HTTP {exc.code}: {error_body}"
+                ) from exc
             raise RuntimeError(f"El workflow de n8n no respondio correctamente: {exc}") from exc
+        except (URLError, TimeoutError) as exc:
+            raise RuntimeError(f"El workflow de n8n no respondio correctamente: {exc}") from exc
+
+        if not raw_body:
+            raise RuntimeError(
+                "El workflow de n8n respondio 200, pero el cuerpo vino vacio. "
+                "Revisa el modo de respuesta del Webhook o el nodo Respond to Webhook."
+            )
+
+        try:
+            raw_payload = json.loads(raw_body)
+        except json.JSONDecodeError as exc:
+            preview = raw_body[:200]
+            raise RuntimeError(f"El workflow de n8n no devolvio JSON valido: {preview}") from exc
+
+        if isinstance(raw_payload, list) and raw_payload:
+            raw_payload = raw_payload[0]
+
+        if not isinstance(raw_payload, dict):
+            raise RuntimeError("El workflow de n8n no devolvio un objeto JSON.")
 
         words = raw_payload.get("words")
         if not isinstance(words, list):

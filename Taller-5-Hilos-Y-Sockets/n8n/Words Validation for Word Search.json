@@ -5,29 +5,30 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "words-validator",
-        "responseMode": "responseNode",
+        "responseMode": "lastNode",
         "options": {}
       },
-      "id": "1",
+      "id": "fcaf4ba9-7d11-4012-ad2f-b8a6eddd4aeb",
       "name": "Receive Language",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        220,
-        300
-      ]
+        0,
+        0
+      ],
+      "webhookId": "640810e6-929e-4d80-8933-d87924e8946a"
     },
     {
       "parameters": {
         "jsCode": "const body = $json.body ?? $json;\nconst rawLanguage = String(body.language ?? 'es').trim().toLowerCase();\nconst language = ['es', 'en'].includes(rawLanguage) ? rawLanguage : 'es';\nreturn [{\n  json: {\n    language,\n    count: 10,\n    minLength: 4,\n    maxLength: 12\n  }\n}];"
       },
-      "id": "2",
+      "id": "be35d1dd-b152-451d-ba0e-e244f2789638",
       "name": "Normalize Input",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        460,
-        300
+        240,
+        0
       ]
     },
     {
@@ -35,39 +36,37 @@
         "url": "=https://random-words-api.kushcreates.com/api?language={{$json.language}}",
         "options": {}
       },
-      "id": "3",
+      "id": "28d563f1-6782-40ac-80b9-816c91653a73",
       "name": "Fetch Random Words",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [
-        700,
-        300
+        480,
+        0
       ]
     },
     {
       "parameters": {
         "jsCode": "const config = $('Normalize Input').first().json;\nconst language = config.language;\nconst count = config.count;\nconst minLength = config.minLength;\nconst maxLength = config.maxLength;\n\nconst normalizeWord = (word) => String(word)\n  .normalize('NFD')\n  .replace(/[\\u0300-\\u036f]/g, '')\n  .replace(/[^A-Za-z]/g, '')\n  .toUpperCase();\n\nconst shuffle = (array) => {\n  const copy = [...array];\n  for (let index = copy.length - 1; index > 0; index -= 1) {\n    const randomIndex = Math.floor(Math.random() * (index + 1));\n    [copy[index], copy[randomIndex]] = [copy[randomIndex], copy[index]];\n  }\n  return copy;\n};\n\nconst payload = items.map(item => item.json);\nconst seen = new Set();\nconst allCandidates = [];\n\nfor (const item of payload) {\n  const rawWord = String(item.word ?? '').trim();\n  if (!rawWord) continue;\n  const cleaned = normalizeWord(rawWord);\n  if (!cleaned) continue;\n  if (cleaned.length < minLength || cleaned.length > maxLength) continue;\n  if (seen.has(cleaned)) continue;\n  seen.add(cleaned);\n  allCandidates.push(cleaned);\n}\n\nif (allCandidates.length < count) {\n  throw new Error(`Solo se obtuvieron ${allCandidates.length} candidatas despues del filtrado.`);\n}\n\nconst candidates = shuffle(allCandidates).slice(0, Math.min(25, allCandidates.length));\n\nreturn [{\n  json: {\n    language,\n    count,\n    candidates\n  }\n}];"
       },
-      "id": "4",
+      "id": "a7db406f-0acf-4dc3-9705-0d901126be43",
       "name": "Filter Candidates",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        940,
-        300
+        720,
+        0
       ]
     },
     {
       "parameters": {
         "method": "POST",
         "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            {
-              "name": "x-goog-api-key",
-              "value": "AIzaSyBVSwSzyaom9uM60oimJOsuigERrmy-L-0"
-            },
             {
               "name": "Content-Type",
               "value": "application/json"
@@ -76,47 +75,39 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"Valida esta lista de palabras para una sopa de letras. Reglas: 1) idioma: {{$json.language === 'es' ? 'español' : 'inglés'}}, 2) devuelve exactamente 10 palabras, 3) solo letras, 4) sin numeros ni simbolos, 5) evita palabras ofensivas, extremadamente raras o poco claras, 6) responde solo JSON con este formato exacto: {\\\"words\\\":[\\\"PALABRA1\\\",\\\"PALABRA2\\\"]}. Lista candidata: {{$json.candidates.join(', ')}}\"\n        }\n      ]\n    }\n  ]\n}",
+        "jsonBody": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"Valida esta lista de palabras para una sopa de letras. Reglas: 1) idioma: {{$json.language === 'es' ? 'espanol' : 'ingles'}}, 2) devuelve exactamente 10 palabras, 3) solo letras, 4) sin numeros ni simbolos, 5) evita palabras ofensivas, extremadamente raras o poco claras, 6) responde solo JSON con este formato exacto: {\\\"words\\\":[\\\"PALABRA1\\\",\\\"PALABRA2\\\"]}. Lista candidata: {{$json.candidates.join(', ')}}\"\n        }\n      ]\n    }\n  ]\n}",
         "options": {}
       },
-      "id": "5",
+      "id": "c14e21ab-45a9-4b8f-972b-78acf4cfa6d1",
       "name": "Validate With Gemini",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [
-        1200,
-        300
-      ]
+        992,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "bCc0lXbY8V610Q2u",
+          "name": "Header Auth account"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "const fallback = $('Filter Candidates').first().json;\nconst candidates = fallback.candidates;\nconst language = fallback.language;\nconst count = fallback.count;\n\nconst normalizeWord = (word) => String(word)\n  .normalize('NFD')\n  .replace(/[\\u0300-\\u036f]/g, '')\n  .replace(/[^A-Za-z]/g, '')\n  .toUpperCase();\n\nlet text = '';\ntry {\n  text = $json.candidates?.[0]?.content?.parts?.[0]?.text ?? '';\n} catch (error) {\n  text = '';\n}\n\nlet parsedWords = [];\ntry {\n  const cleanedText = text.trim().replace(/^```json\\s*/i, '').replace(/^```/i, '').replace(/```$/i, '').trim();\n  const parsed = JSON.parse(cleanedText);\n  if (Array.isArray(parsed.words)) {\n    parsedWords = parsed.words;\n  }\n} catch (error) {\n  parsedWords = [];\n}\n\nconst finalWords = [];\nconst seen = new Set();\nfor (const word of parsedWords) {\n  const cleaned = normalizeWord(word);\n  if (!cleaned) continue;\n  if (seen.has(cleaned)) continue;\n  seen.add(cleaned);\n  finalWords.push(cleaned);\n  if (finalWords.length >= count) break;\n}\n\nif (finalWords.length < count) {\n  for (const word of candidates) {\n    const cleaned = normalizeWord(word);\n    if (!cleaned) continue;\n    if (seen.has(cleaned)) continue;\n    seen.add(cleaned);\n    finalWords.push(cleaned);\n    if (finalWords.length >= count) break;\n  }\n}\n\nif (finalWords.length < count) {\n  throw new Error(`No fue posible completar ${count} palabras validas.`);\n}\n\nreturn [{\n  json: {\n    language,\n    words: finalWords.slice(0, count)\n  }\n}];"
+        "jsCode": "const context = $('Filter Candidates').first().json;\nconst language = context.language;\nconst count = context.count;\n\nconst normalizeWord = (word) => String(word)\n  .normalize('NFD')\n  .replace(/[\\u0300-\\u036f]/g, '')\n  .replace(/[^A-Za-z]/g, '')\n  .toUpperCase();\n\nconst text = $json.candidates?.[0]?.content?.parts?.[0]?.text ?? '';\nif (!text) {\n  throw new Error('Gemini no devolvio texto de validacion. Revisa la credencial Header Auth, la API key, el modelo o la respuesta del nodo HTTP.');\n}\n\nlet parsed;\ntry {\n  const cleanedText = text.trim().replace(/^```json\\s*/i, '').replace(/^```/i, '').replace(/```$/i, '').trim();\n  parsed = JSON.parse(cleanedText);\n} catch (error) {\n  throw new Error(`Gemini no respondio JSON valido: ${text}`);\n}\n\nif (!Array.isArray(parsed.words)) {\n  throw new Error('Gemini no devolvio el arreglo words.');\n}\n\nconst finalWords = [];\nconst seen = new Set();\nfor (const word of parsed.words) {\n  const cleaned = normalizeWord(word);\n  if (!cleaned) continue;\n  if (seen.has(cleaned)) continue;\n  seen.add(cleaned);\n  finalWords.push(cleaned);\n}\n\nif (finalWords.length !== count) {\n  throw new Error(`Gemini debe validar exactamente ${count} palabras; devolvio ${finalWords.length}.`);\n}\n\nreturn [{\n  json: {\n    language,\n    words: finalWords\n  }\n}];"
       },
-      "id": "6",
+      "id": "0b489ce6-c167-48e3-aacb-ee3a9e97555f",
       "name": "Build Final Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1460,
-        300
-      ]
-    },
-    {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={{$json}}",
-        "options": {}
-      },
-      "id": "7",
-      "name": "Return Words",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1,
-      "position": [
-        1700,
-        300
+        1248,
+        0
       ]
     }
   ],
+  "pinData": {},
   "connections": {
     "Receive Language": {
       "main": [
@@ -172,20 +163,18 @@
           }
         ]
       ]
-    },
-    "Build Final Response": {
-      "main": [
-        [
-          {
-            "node": "Return Words",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
-  "active": false,
-  "settings": {},
-  "versionId": "1"
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "efd38940-e8a5-4482-9e5b-06d4fb882441",
+  "meta": {
+    "instanceId": "fa4642be02c5904cb5deb28e0136ffea0d7386ebb459d46848ea26fa181dc0c2"
+  },
+  "id": "akL6kirORWpWP1MO",
+  "tags": []
 }
