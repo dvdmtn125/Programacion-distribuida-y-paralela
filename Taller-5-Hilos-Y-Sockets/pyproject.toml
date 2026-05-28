@@ -9,3 +9,4 @@ dependencies = []
 [project.scripts]
 taller-sopa = "word_search.bootstrap:main"
 taller-servidor = "word_search.server_launcher:main"
+taller-cliente = "word_search.client_launcher:main"

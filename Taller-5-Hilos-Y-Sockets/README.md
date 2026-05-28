@@ -83,11 +83,22 @@ Si `n8n` no responde, el servidor vuelve automaticamente a la API directa para n
 
 Servidor:
 
-```bash
+```powershell
+$env:N8N_WORDS_WEBHOOK_URL="http://localhost:5678/webhook/words-validator"
+$env:N8N_TIMEOUT_SECONDS="60"
+
 uv run python -m word_search.server_launcher
 ```
 
-Cliente y servidor embebido:
+Cliente:
+
+```powershell
+uv run python -m word_search.client_launcher
+```
+
+Puedes abrir varios clientes en terminales distintas usando el mismo comando. Todos se conectan al servidor activo en `127.0.0.1:5050`.
+
+Cliente y servidor embebido en una sola ejecucion:
 
 ```bash
 uv run python main.py
