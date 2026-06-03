@@ -9,3 +9,7 @@ def main() -> None:
     server_port = int(os.getenv("WORD_SEARCH_SERVER_PORT", "5050"))
     app = WordSearchApp(server_host=server_host, server_port=server_port)
     app.run()
+
+
+if __name__ == "__main__":
+    main()
